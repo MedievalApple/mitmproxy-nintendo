@@ -1,12 +1,33 @@
 from mitmproxy import http, ctx
-
+import mitmproxy.http
 
 class PretendoAddon:
     def load(self, loader) -> None:
         loader.add_option(
+            name="badge_arcade_redirect",
+            typespec=bool,
+            default=False,
+            help="Redirect Badge Arcade rquests to custom server",
+        )
+
+        loader.add_option(
+            name="badge_arcade_host",
+            typespec=str,
+            default="",
+            help="Host to send Badge Arcade requests to (keeps the original host in the Host header)",
+        )
+
+        loader.add_option(
+            name="badge_arcade_host_port",
+            typespec=int,
+            default=59400,
+            help="Port to send Badge Arcade requests to (only applies if pretendo_host is set)",
+        )
+
+        loader.add_option(
             name="pretendo_redirect",
             typespec=bool,
-            default=True,
+            default=False,
             help="Redirect all requests from Nintendo to Pretendo",
         )
 
@@ -54,6 +75,15 @@ class PretendoAddon:
 
                 if ctx.options.pretendo_http:
                     flow.request.scheme = "http"
+
+        if ctx.options.badge_arcade_redirect and (
+            flow.request.pretty_url == "https://account.pretendo.cc/v1/api/provider/nex_token/@me?game_server_id=00134600"
+        ):
+            flow.response = mitmproxy.http.Response.make(
+                200,
+                f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><nex_token><host>{ctx.options.badge_arcade_host}</host><nex_password>nexpassword</nex_password><pid>PID</pid><port>{ctx.options.badge_arcade_port}</port><token>token</token></nex_token>''',
+                {"Content-Type":"application/xml;charset=UTF-8"}
+            )
 
 
 addons = [PretendoAddon()]
