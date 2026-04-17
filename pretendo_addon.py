@@ -21,7 +21,7 @@ class PretendoAddon:
             name="badge_arcade_host_port",
             typespec=int,
             default=59400,
-            help="Port to send Badge Arcade requests to (only applies if pretendo_host is set)",
+            help="Port to send Badge Arcade requests to (only applies if badge_arcade_host is set)",
         )
 
         loader.add_option(
@@ -81,7 +81,7 @@ class PretendoAddon:
         ):
             flow.response = mitmproxy.http.Response.make(
                 200,
-                f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><nex_token><host>{ctx.options.badge_arcade_host}</host><nex_password>nexpassword</nex_password><pid>PID</pid><port>{ctx.options.badge_arcade_port}</port><token>token</token></nex_token>''',
+                f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><nex_token><host>{ctx.options.badge_arcade_host}</host><nex_password>nexpassword</nex_password><pid>PID</pid><port>{ctx.options.badge_arcade_host_port}</port><token>token</token></nex_token>''',
                 {"Content-Type":"application/xml;charset=UTF-8"}
             )
 
